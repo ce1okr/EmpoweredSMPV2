@@ -1,0 +1,20 @@
+name: EmpowerSMP
+version: '2.0.0'
+main: com.empowersmp.EmpowerSMP
+api-version: '1.21'
+author: EmpowerSMP
+description: Class-based RPG plugin (Strength, Defense, Mobility, Ranger, Vitality, Elemental, Invisibility, Prosperity)
+
+commands:
+  empower:
+    description: EmpowerSMP command
+    usage: /empower <class|give|set|levels|info> ...
+    permission: empowersmp.use
+
+permissions:
+  empowersmp.admin:
+    description: Allows granting/setting class levels and resetting classes
+    default: op
+  empowersmp.use:
+    description: Allows using base empower commands
+    default: true
