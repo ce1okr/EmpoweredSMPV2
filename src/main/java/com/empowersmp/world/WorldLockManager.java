@@ -73,4 +73,4 @@ public class WorldLockManager {
             plugin.getLogger().log(Level.WARNING, "Failed to save worldlocks.yml", e);
         }
     }
-}
+} 
