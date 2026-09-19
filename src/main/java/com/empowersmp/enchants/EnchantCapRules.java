@@ -1,21 +1,22 @@
 package com.empowersmp.enchants;
 
 import com.empowersmp.EmpowerSMP;
-import com.empowersmp.classes.PlayerClass;
-import com.empowersmp.data.PlayerData;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 
 import java.util.Set;
 
 /**
- * Resolves the max level a given enchantment may reach for a given player,
- * based on server-wide base caps and their class + level:
- *   - Sharpness/Smite/Bane of Arthropods: base 4, raised to 5 at Strength L3
- *   - Protection/Blast/Projectile/Fire Protection: base 3, raised to 4 at Vitality L3
- *   - Power: base 4, raised to 5 at Ranger L1
- * Quick Charge is NOT handled here - Ranger L4's Quick Charge X crossbow is a
- * directly-granted custom item, not an anvil-combinable cap.
+ * Resolves the max level a given enchantment may reach. PHASE 1: these are
+ * flat caps for EVERYONE, with no class/level-based exceptions - there's no
+ * real way to earn an elevated cap yet since Phase 2's abilities (Strength
+ * L3, Vitality L3, Ranger L1) aren't built. Once those exist, capFor() will
+ * start checking the player's class + level again to raise these for
+ * qualifying players, the same way it will for the world locks.
+ *
+ *   - Sharpness/Smite/Bane of Arthropods: capped at 4 (vanilla max is 5)
+ *   - Protection/Blast/Projectile/Fire Protection: capped at 3 (vanilla max is 4)
+ *   - Power: capped at 4 (vanilla max is 5)
  */
 public class EnchantCapRules {
 
@@ -34,22 +35,9 @@ public class EnchantCapRules {
 
     /** Max level `enchantment` may reach for `player`, or -1 for "not governed here". */
     public int capFor(Player player, Enchantment enchantment) {
-        PlayerData data = plugin.getDataManager().get(player.getUniqueId());
-        PlayerClass playerClass = data.getPlayerClass();
-        int level = data.getLevel();
-
-        if (SHARPNESS_FAMILY.contains(enchantment)) {
-            boolean elevated = playerClass == PlayerClass.STRENGTH && level >= 3;
-            return elevated ? 5 : 4;
-        }
-        if (PROTECTION_FAMILY.contains(enchantment)) {
-            boolean elevated = playerClass == PlayerClass.VITALITY && level >= 3;
-            return elevated ? 4 : 3;
-        }
-        if (enchantment.equals(Enchantment.POWER)) {
-            boolean elevated = playerClass == PlayerClass.RANGER && level >= 1;
-            return elevated ? 5 : 4;
-        }
+        if (SHARPNESS_FAMILY.contains(enchantment)) return 4;
+        if (PROTECTION_FAMILY.contains(enchantment)) return 3;
+        if (enchantment.equals(Enchantment.POWER)) return 4;
         return -1;
     }
 
