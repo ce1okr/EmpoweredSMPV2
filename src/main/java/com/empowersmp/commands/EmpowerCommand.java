@@ -24,6 +24,7 @@ import java.util.stream.Stream;
  * /empower give <player> <amount>    - grant levels within their current class (admin, after events)
  * /empower set  <player> <level>     - set an exact level within their current class (admin)
  * /empower resetclass <player>       - clear a player's class so they can pick again (admin)
+ * /empower unlock <nether|end|villagers> - permanently unlock for everyone (admin)
  * /empower levels [player]           - view current class + level
  * /empower info                      - list the classes
  */
@@ -38,7 +39,7 @@ public class EmpowerCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage: /empower <class|give|set|levels|resetclass|info>", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Usage: /empower <class|give|set|levels|resetclass|unlock|info>", NamedTextColor.RED));
             return true;
         }
 
@@ -47,6 +48,7 @@ public class EmpowerCommand implements CommandExecutor, TabCompleter {
             case "give" -> handleGiveOrSet(sender, args, true);
             case "set" -> handleGiveOrSet(sender, args, false);
             case "resetclass" -> handleResetClass(sender, args);
+            case "unlock" -> handleUnlock(sender, args);
             case "levels" -> handleLevels(sender, args);
             case "info" -> handleInfo(sender);
             default -> sender.sendMessage(Component.text("Unknown subcommand.", NamedTextColor.RED));
@@ -132,6 +134,32 @@ public class EmpowerCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    private void handleUnlock(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("empowersmp.admin")) {
+            sender.sendMessage(Component.text("You don't have permission to do that.", NamedTextColor.RED));
+            return;
+        }
+        if (args.length < 2) {
+            sender.sendMessage(Component.text("Usage: /empower unlock <nether|end|villagers>", NamedTextColor.RED));
+            return;
+        }
+        switch (args[1].toLowerCase()) {
+            case "nether" -> {
+                plugin.getWorldLockManager().unlockNether();
+                Bukkit.broadcast(Component.text("The Nether has been unlocked for everyone!", NamedTextColor.GOLD));
+            }
+            case "end" -> {
+                plugin.getWorldLockManager().unlockEnd();
+                Bukkit.broadcast(Component.text("The End has been unlocked for everyone!", NamedTextColor.GOLD));
+            }
+            case "villagers" -> {
+                plugin.getWorldLockManager().unlockVillagers();
+                Bukkit.broadcast(Component.text("Villagers have been unlocked for everyone!", NamedTextColor.GOLD));
+            }
+            default -> sender.sendMessage(Component.text("Usage: /empower unlock <nether|end|villagers>", NamedTextColor.RED));
+        }
+    }
+
     private void handleResetClass(CommandSender sender, String[] args) {
         if (!sender.hasPermission("empowersmp.admin")) {
             sender.sendMessage(Component.text("You don't have permission to do that.", NamedTextColor.RED));
@@ -185,7 +213,10 @@ public class EmpowerCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(List.of("class", "give", "set", "resetclass", "levels", "info"), args[0]);
+            return filter(List.of("class", "give", "set", "resetclass", "unlock", "levels", "info"), args[0]);
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("unlock")) {
+            return filter(List.of("nether", "end", "villagers"), args[1]);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("class")) {
             return filter(Stream.of(PlayerClass.values()).map(PlayerClass::displayName).collect(Collectors.toList()), args[1]);
