@@ -18,9 +18,10 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 /**
  * Enforces the three server-wide locks: Nether portals, End portals (and End
  * gateways), and villager/wandering-trader interaction. Elemental-class
- * players always get early Nether access regardless of the lock; everyone
- * else (and every class for End/Villagers) is blocked until the matching
- * /empower unlock command has been run.
+ * players always get early Nether access, and Prosperity-class players can
+ * always trade with villagers, regardless of the global lock. Everyone else
+ * (and everyone for End) is blocked until the matching /empower unlock
+ * command has been run.
  */
 public class WorldLockListener implements Listener {
 
@@ -59,10 +60,16 @@ public class WorldLockListener implements Listener {
     public void onInteractEntity(PlayerInteractEntityEvent event) {
         if (locks.isVillagersUnlocked()) return;
         EntityType type = event.getRightClicked().getType();
-        if (type == EntityType.VILLAGER || type == EntityType.WANDERING_TRADER) {
-            event.setCancelled(true);
-            event.getPlayer().sendMessage(Component.text(
-                    "Villagers are locked. An admin needs to unlock them first.", NamedTextColor.RED));
+        if (type != EntityType.VILLAGER && type != EntityType.WANDERING_TRADER) return;
+
+        Player player = event.getPlayer();
+        PlayerData data = dataManager.get(player.getUniqueId());
+        if (data.getPlayerClass() == PlayerClass.PROSPERITY) {
+            return; // Prosperity can always trade, lock or no lock
         }
+
+        event.setCancelled(true);
+        player.sendMessage(Component.text(
+                "Villagers are locked. An admin needs to unlock them first.", NamedTextColor.RED));
     }
 }
