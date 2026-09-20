@@ -9,10 +9,10 @@ public class PlayerData {
     public enum BootChoice { NONE, DEPTH_STRIDER, FROST_WALKER }
 
     private final UUID uuid;
-    private PlayerClass playerClass; // null = hasn't picked yet
+    private PlayerClass playerClass;
     private int level = 0;
+    private int pvpDeaths = 0;
     private boolean receivedStartingKit = false;
-    private int pvpDeaths = 0; // 0, 1, or 2 - hitting 2 triggers a level-down and resets to 0
 
     private BootChoice bootChoice = BootChoice.NONE;
     private boolean receivedCrossbow = false;
@@ -66,15 +66,16 @@ public class PlayerData {
 
     public void setReceivedStartingKit(boolean receivedStartingKit) {
         this.receivedStartingKit = receivedStartingKit;
+        
     }
 
-    public int getPvpDeaths() {
-        return pvpDeaths;
-    }
+   public int getPvpDeaths() {
+    return pvpDeaths;
+}
 
-    public void setPvpDeaths(int pvpDeaths) {
-        this.pvpDeaths = Math.max(0, Math.min(2, pvpDeaths));
-    }
+public void setPvpDeaths(int pvpDeaths) {
+    this.pvpDeaths = Math.max(0, pvpDeaths);
+}
 
     public BootChoice getBootChoice() {
         return bootChoice;
@@ -151,4 +152,20 @@ public class PlayerData {
         heartBurstCooldownEnd = 0;
         speedBlitzCooldownEnd = 0;
     }
+}
+
+public boolean hasReceivedStartingKit() {
+    return receivedStartingKit;
+}
+
+public void setReceivedStartingKit(boolean receivedStartingKit) {
+    this.receivedStartingKit = receivedStartingKit;
+}
+
+public int getPvpDeaths() {
+    return pvpDeaths;
+}
+
+public void setPvpDeaths(int pvpDeaths) {
+    this.pvpDeaths = Math.max(0, pvpDeaths);
 }
