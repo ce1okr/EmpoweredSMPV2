@@ -55,6 +55,7 @@ public class DataManager {
             if (playerClass != null) {
                 data.setPlayerClass(playerClass);
                 data.setLevel(yml.getInt("level", 0));
+                data.setPvpDeaths(yml.getInt("pvpDeaths", 0));
                 data.setReceivedStartingKit(yml.getBoolean("receivedStartingKit", false));
                 data.setReceivedCrossbow(yml.getBoolean("receivedCrossbow", false));
                 data.setReceivedShield(yml.getBoolean("receivedShield", false));
@@ -80,6 +81,7 @@ public class DataManager {
         if (data.getPlayerClass() != null) {
             yml.set("class", data.getPlayerClass().name());
             yml.set("level", data.getLevel());
+            yml.set("pvpDeaths", data.getPvpDeaths());
             yml.set("receivedStartingKit", data.hasReceivedStartingKit());
             yml.set("receivedCrossbow", data.hasReceivedCrossbow());
             yml.set("receivedShield", data.hasReceivedShield());
