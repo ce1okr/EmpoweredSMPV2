@@ -56,6 +56,18 @@ public class DataManager {
                 data.setPlayerClass(playerClass);
                 data.setLevel(yml.getInt("level", 0));
                 data.setReceivedStartingKit(yml.getBoolean("receivedStartingKit", false));
+                data.setReceivedCrossbow(yml.getBoolean("receivedCrossbow", false));
+                data.setReceivedShield(yml.getBoolean("receivedShield", false));
+                data.setRangerShotStreak(yml.getInt("rangerShotStreak", 0));
+                try {
+                    data.setBootChoice(PlayerData.BootChoice.valueOf(yml.getString("bootChoice", "NONE")));
+                } catch (IllegalArgumentException ignored) {
+                    data.setBootChoice(PlayerData.BootChoice.NONE);
+                }
+                data.setBerserkCooldownEnd(yml.getLong("berserkCooldownEnd", 0));
+                data.setLastStandCooldownEnd(yml.getLong("lastStandCooldownEnd", 0));
+                data.setHeartBurstCooldownEnd(yml.getLong("heartBurstCooldownEnd", 0));
+                data.setSpeedBlitzCooldownEnd(yml.getLong("speedBlitzCooldownEnd", 0));
             }
         }
         data.setPvpDeaths(yml.getInt("pvpDeaths", 0));
@@ -69,6 +81,14 @@ public class DataManager {
             yml.set("class", data.getPlayerClass().name());
             yml.set("level", data.getLevel());
             yml.set("receivedStartingKit", data.hasReceivedStartingKit());
+            yml.set("receivedCrossbow", data.hasReceivedCrossbow());
+            yml.set("receivedShield", data.hasReceivedShield());
+            yml.set("rangerShotStreak", data.getRangerShotStreak());
+            yml.set("bootChoice", data.getBootChoice().name());
+            yml.set("berserkCooldownEnd", data.getBerserkCooldownEnd());
+            yml.set("lastStandCooldownEnd", data.getLastStandCooldownEnd());
+            yml.set("heartBurstCooldownEnd", data.getHeartBurstCooldownEnd());
+            yml.set("speedBlitzCooldownEnd", data.getSpeedBlitzCooldownEnd());
         }
         yml.set("pvpDeaths", data.getPvpDeaths());
         try {
