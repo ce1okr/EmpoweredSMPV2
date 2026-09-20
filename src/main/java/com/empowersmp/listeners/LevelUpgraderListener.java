@@ -22,9 +22,11 @@ import org.bukkit.inventory.ItemStack;
  */
 public class LevelUpgraderListener implements Listener {
 
+    private final EmpowerSMP plugin;
     private final DataManager dataManager;
 
     public LevelUpgraderListener(EmpowerSMP plugin) {
+        this.plugin = plugin;
         this.dataManager = plugin.getDataManager();
     }
 
@@ -52,6 +54,7 @@ public class LevelUpgraderListener implements Listener {
         data.addLevel(1);
         dataManager.save(data);
         item.setAmount(item.getAmount() - 1);
+        plugin.getClassAbilityManager().refresh(player);
         player.sendMessage(Component.text(
                 "Your " + data.getPlayerClass().displayName() + " level is now " + data.getLevel() + "!",
                 NamedTextColor.LIGHT_PURPLE));
