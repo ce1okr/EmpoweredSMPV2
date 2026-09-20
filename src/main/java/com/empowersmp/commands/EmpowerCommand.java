@@ -20,13 +20,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * /empower class <name>              - pick your class (once; admin can reset)
+ * /empower setclass <player> <name>  - assign a class to a player (admin only)
  * /empower give <player> <amount>    - grant levels within their current class (admin, after events)
  * /empower set  <player> <level>     - set an exact level within their current class (admin)
- * /empower resetclass <player>       - clear a player's class so they can pick again (admin)
+ * /empower resetclass <player>       - clear a player's class so they can be assigned another (admin)
  * /empower unlock <nether|end|villagers> - permanently unlock for everyone (admin)
  * /empower levels [player]           - view current class + level
  * /empower info                      - list the classes
+ *
+ * There is NO player-facing way to pick a class - only an admin can assign
+ * one, via /empower setclass.
  */
 public class EmpowerCommand implements CommandExecutor, TabCompleter {
 
@@ -39,12 +42,12 @@ public class EmpowerCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage: /empower <class|give|set|levels|resetclass|unlock|info>", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Usage: /empower <setclass|give|set|levels|resetclass|unlock|info>", NamedTextColor.RED));
             return true;
         }
 
         switch (args[0].toLowerCase()) {
-            case "class" -> handlePickClass(sender, args);
+            case "setclass" -> handleSetClass(sender, args);
             case "give" -> handleGiveOrSet(sender, args, true);
             case "set" -> handleGiveOrSet(sender, args, false);
             case "resetclass" -> handleResetClass(sender, args);
@@ -56,36 +59,44 @@ public class EmpowerCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private void handlePickClass(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("Only players can use this.", NamedTextColor.RED));
+    private void handleSetClass(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("empowersmp.admin")) {
+            sender.sendMessage(Component.text("You don't have permission to do that.", NamedTextColor.RED));
             return;
         }
-        if (args.length < 2) {
-            sender.sendMessage(Component.text("Usage: /empower class <name>", NamedTextColor.RED));
+        if (args.length < 3) {
+            sender.sendMessage(Component.text("Usage: /empower setclass <player> <name>", NamedTextColor.RED));
             return;
         }
-        PlayerData data = plugin.getDataManager().get(player.getUniqueId());
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+        PlayerData data = plugin.getDataManager().get(target.getUniqueId());
         if (data.getPlayerClass() != null) {
-            player.sendMessage(Component.text(
-                    "You already picked " + data.getPlayerClass().displayName()
-                            + ". Ask an admin to reset your class if you need to change.",
+            sender.sendMessage(Component.text(
+                    (target.getName() == null ? args[1] : target.getName()) + " already has "
+                            + data.getPlayerClass().displayName() + ". Use /empower resetclass first.",
                     NamedTextColor.RED));
             return;
         }
-        PlayerClass playerClass = PlayerClass.fromString(args[1]);
+        PlayerClass playerClass = PlayerClass.fromString(args[2]);
         if (playerClass == null) {
-            player.sendMessage(Component.text("Unknown class: " + args[1], NamedTextColor.RED));
+            sender.sendMessage(Component.text("Unknown class: " + args[2], NamedTextColor.RED));
             return;
         }
         data.setPlayerClass(playerClass);
         plugin.getDataManager().save(data);
-        StartingKits.grant(player, playerClass);
-        data.setReceivedStartingKit(true);
-        plugin.getDataManager().save(data);
-        player.sendMessage(Component.text(
-                "You are now " + playerClass.displayName() + "! Your starting kit has been given.",
-                NamedTextColor.LIGHT_PURPLE));
+
+        Player online = target.getPlayer();
+        if (online != null) {
+            StartingKits.grant(online, playerClass);
+            data.setReceivedStartingKit(true);
+            plugin.getDataManager().save(data);
+            online.sendMessage(Component.text(
+                    "You have been made " + playerClass.displayName() + "! Your starting kit has been given.",
+                    NamedTextColor.LIGHT_PURPLE));
+        }
+        sender.sendMessage(Component.text(
+                (target.getName() == null ? args[1] : target.getName()) + " is now " + playerClass.displayName() + ".",
+                NamedTextColor.GREEN));
     }
 
     private void handleGiveOrSet(CommandSender sender, String[] args, boolean relative) {
@@ -101,7 +112,7 @@ public class EmpowerCommand implements CommandExecutor, TabCompleter {
         PlayerData data = plugin.getDataManager().get(target.getUniqueId());
         if (data.getPlayerClass() == null) {
             sender.sendMessage(Component.text(
-                    (target.getName() == null ? args[1] : target.getName()) + " hasn't picked a class yet.",
+                    (target.getName() == null ? args[1] : target.getName()) + " hasn't been assigned a class yet.",
                     NamedTextColor.RED));
             return;
         }
@@ -191,7 +202,7 @@ public class EmpowerCommand implements CommandExecutor, TabCompleter {
         PlayerData data = plugin.getDataManager().get(target.getUniqueId());
         String name = target.getName() == null ? "Player" : target.getName();
         if (data.getPlayerClass() == null) {
-            sender.sendMessage(Component.text(name + " hasn't picked a class yet.", NamedTextColor.AQUA));
+            sender.sendMessage(Component.text(name + " hasn't been assigned a class yet.", NamedTextColor.AQUA));
             return;
         }
         sender.sendMessage(Component.text(
@@ -206,24 +217,23 @@ public class EmpowerCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("- " + c.displayName() + " (levels 0-" + c.maxLevel() + ")",
                     NamedTextColor.AQUA));
         }
-        sender.sendMessage(Component.text("Pick one with /empower class <name>. Choose carefully!",
-                NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("Classes are assigned by staff - ask an admin!", NamedTextColor.GRAY));
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(List.of("class", "give", "set", "resetclass", "unlock", "levels", "info"), args[0]);
+            return filter(List.of("setclass", "give", "set", "resetclass", "unlock", "levels", "info"), args[0]);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("unlock")) {
             return filter(List.of("nether", "end", "villagers"), args[1]);
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("class")) {
-            return filter(Stream.of(PlayerClass.values()).map(PlayerClass::displayName).collect(Collectors.toList()), args[1]);
-        }
-        if (args.length == 2 && (args[0].equalsIgnoreCase("give") || args[0].equalsIgnoreCase("set")
-                || args[0].equalsIgnoreCase("resetclass") || args[0].equalsIgnoreCase("levels"))) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("setclass") || args[0].equalsIgnoreCase("give")
+                || args[0].equalsIgnoreCase("set") || args[0].equalsIgnoreCase("resetclass") || args[0].equalsIgnoreCase("levels"))) {
             return filter(Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()), args[1]);
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("setclass")) {
+            return filter(Stream.of(PlayerClass.values()).map(PlayerClass::displayName).collect(Collectors.toList()), args[2]);
         }
         return new ArrayList<>();
     }
