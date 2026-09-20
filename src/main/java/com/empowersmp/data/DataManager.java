@@ -58,6 +58,7 @@ public class DataManager {
                 data.setReceivedStartingKit(yml.getBoolean("receivedStartingKit", false));
             }
         }
+        data.setPvpDeaths(yml.getInt("pvpDeaths", 0));
         return data;
     }
 
@@ -69,6 +70,7 @@ public class DataManager {
             yml.set("level", data.getLevel());
             yml.set("receivedStartingKit", data.hasReceivedStartingKit());
         }
+        yml.set("pvpDeaths", data.getPvpDeaths());
         try {
             yml.save(file);
         } catch (IOException e) {
