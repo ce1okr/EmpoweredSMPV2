@@ -9,14 +9,36 @@ import java.util.UUID;
  * within that class (0 = just picked, gets the "Level 0" starting kit), and
  * their PVP-death counter (0, 1, or 2 - reaching 2 drops them a level and
  * resets to 0).
+ *
+ * PHASE 2 ADDITIONS:
+ *   - bootChoice: Mobility L1's one-time Depth Strider vs Frost Walker pick
+ *   - receivedCrossbow / receivedShield: one-time gear grants (Ranger L4,
+ *     Defense L1) - gone forever once lost, never reissued
+ *   - rangerShotStreak: consecutive successful bow hits, feeds Ranger's
+ *     L3/L5 shot procs
+ *   - the 4 auto-trigger ability cooldowns (Berserk, Last Stand, Heart
+ *     Burst, Speed Blitz), stored as the epoch-millis they end at so they
+ *     survive a server restart. Dying resets all 4 back to 0 (ready).
  */
 public class PlayerData {
+
+    public enum BootChoice { NONE, DEPTH_STRIDER, FROST_WALKER }
 
     private final UUID uuid;
     private PlayerClass playerClass; // null = hasn't picked yet
     private int level = 0;
     private boolean receivedStartingKit = false;
     private int pvpDeaths = 0; // 0, 1, or 2 - hitting 2 triggers a level-down and resets to 0
+
+    private BootChoice bootChoice = BootChoice.NONE;
+    private boolean receivedCrossbow = false;
+    private boolean receivedShield = false;
+    private int rangerShotStreak = 0;
+
+    private long berserkCooldownEnd = 0;
+    private long lastStandCooldownEnd = 0;
+    private long heartBurstCooldownEnd = 0;
+    private long speedBlitzCooldownEnd = 0;
 
     public PlayerData(UUID uuid) {
         this.uuid = uuid;
@@ -34,6 +56,11 @@ public class PlayerData {
         this.playerClass = playerClass;
         this.level = 0;
         this.receivedStartingKit = false;
+        this.bootChoice = BootChoice.NONE;
+        this.receivedCrossbow = false;
+        this.receivedShield = false;
+        this.rangerShotStreak = 0;
+        resetAbilityCooldowns();
     }
 
     public int getLevel() {
@@ -63,5 +90,81 @@ public class PlayerData {
 
     public void setPvpDeaths(int pvpDeaths) {
         this.pvpDeaths = Math.max(0, Math.min(2, pvpDeaths));
+    }
+
+    public BootChoice getBootChoice() {
+        return bootChoice;
+    }
+
+    public void setBootChoice(BootChoice bootChoice) {
+        this.bootChoice = bootChoice;
+    }
+
+    public boolean hasReceivedCrossbow() {
+        return receivedCrossbow;
+    }
+
+    public void setReceivedCrossbow(boolean receivedCrossbow) {
+        this.receivedCrossbow = receivedCrossbow;
+    }
+
+    public boolean hasReceivedShield() {
+        return receivedShield;
+    }
+
+    public void setReceivedShield(boolean receivedShield) {
+        this.receivedShield = receivedShield;
+    }
+
+    public int getRangerShotStreak() {
+        return rangerShotStreak;
+    }
+
+    public void setRangerShotStreak(int rangerShotStreak) {
+        this.rangerShotStreak = rangerShotStreak;
+    }
+
+    public int incrementRangerShotStreak() {
+        return ++rangerShotStreak;
+    }
+
+    public long getBerserkCooldownEnd() {
+        return berserkCooldownEnd;
+    }
+
+    public void setBerserkCooldownEnd(long berserkCooldownEnd) {
+        this.berserkCooldownEnd = berserkCooldownEnd;
+    }
+
+    public long getLastStandCooldownEnd() {
+        return lastStandCooldownEnd;
+    }
+
+    public void setLastStandCooldownEnd(long lastStandCooldownEnd) {
+        this.lastStandCooldownEnd = lastStandCooldownEnd;
+    }
+
+    public long getHeartBurstCooldownEnd() {
+        return heartBurstCooldownEnd;
+    }
+
+    public void setHeartBurstCooldownEnd(long heartBurstCooldownEnd) {
+        this.heartBurstCooldownEnd = heartBurstCooldownEnd;
+    }
+
+    public long getSpeedBlitzCooldownEnd() {
+        return speedBlitzCooldownEnd;
+    }
+
+    public void setSpeedBlitzCooldownEnd(long speedBlitzCooldownEnd) {
+        this.speedBlitzCooldownEnd = speedBlitzCooldownEnd;
+    }
+
+    /** Dying wipes all auto-trigger ability cooldowns back to 0 (ready), per design. */
+    public void resetAbilityCooldowns() {
+        berserkCooldownEnd = 0;
+        lastStandCooldownEnd = 0;
+        heartBurstCooldownEnd = 0;
+        speedBlitzCooldownEnd = 0;
     }
 }
