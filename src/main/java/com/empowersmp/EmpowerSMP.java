@@ -2,9 +2,12 @@ package com.empowersmp;
 
 import com.empowersmp.commands.EmpowerCommand;
 import com.empowersmp.data.DataManager;
+import com.empowersmp.items.CraftingRecipes;
 import com.empowersmp.listeners.EnchantCapListener;
+import com.empowersmp.listeners.LevelUpgraderListener;
 import com.empowersmp.listeners.NetheriteBanListener;
 import com.empowersmp.listeners.PlayerConnectionListener;
+import com.empowersmp.listeners.PlayerDeathEconomyListener;
 import com.empowersmp.listeners.PotionRestrictionListener;
 import com.empowersmp.listeners.WorldLockListener;
 import com.empowersmp.world.WorldLockManager;
@@ -28,11 +31,15 @@ public class EmpowerSMP extends JavaPlugin {
         this.netheriteBanListener = new NetheriteBanListener(this);
         this.potionRestrictionListener = new PotionRestrictionListener(this);
 
+        CraftingRecipes.registerAll(this);
+
         getServer().getPluginManager().registerEvents(new PlayerConnectionListener(this), this);
         getServer().getPluginManager().registerEvents(new WorldLockListener(this), this);
         getServer().getPluginManager().registerEvents(enchantCapListener, this);
         getServer().getPluginManager().registerEvents(netheriteBanListener, this);
         getServer().getPluginManager().registerEvents(potionRestrictionListener, this);
+        getServer().getPluginManager().registerEvents(new PlayerDeathEconomyListener(this), this);
+        getServer().getPluginManager().registerEvents(new LevelUpgraderListener(this), this);
 
         EmpowerCommand cmd = new EmpowerCommand(this);
         getCommand("empower").setExecutor(cmd);
@@ -53,7 +60,7 @@ public class EmpowerSMP extends JavaPlugin {
                 () -> Bukkit.getOnlinePlayers().forEach(potionRestrictionListener::periodicSweep),
                 300L, 300L);
 
-        getLogger().info("EmpowerSMP v2 (Phase 1) enabled.");
+        getLogger().info("EmpowerSMP v2 enabled.");
     }
 
     @Override
