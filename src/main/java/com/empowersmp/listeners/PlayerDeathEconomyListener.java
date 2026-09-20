@@ -20,12 +20,6 @@ import org.bukkit.inventory.PlayerInventory;
  *   - The victim's own held Rank Ups decrease by 1, if they have any.
  *   - The victim's PVP-death counter ticks up (shown as "X/2"); at 2, their
  *     class level drops by 1 and the counter resets to 0.
- *
- * PHASE 2: any death (not just PVP - this part runs regardless of killer)
- * resets the victim's 4 auto-trigger ability cooldowns back to 0 (ready)
- * and their Ranger shot streak back to 0, per design. Infinite/permanent
- * potion effects tied to the player's class+level are restored automatically
- * on respawn by PlayerConnectionListener calling ClassAbilityManager#refresh.
  */
 public class PlayerDeathEconomyListener implements Listener {
 
@@ -38,17 +32,10 @@ public class PlayerDeathEconomyListener implements Listener {
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         Player victim = event.getEntity();
-        PlayerData victimData = dataManager.get(victim.getUniqueId());
-
-        // Ability cooldowns/streaks reset on ANY death, PVP or not.
-        victimData.resetAbilityCooldowns();
-        victimData.setRangerShotStreak(0);
-
         Player killer = victim.getKiller();
-        if (killer == null) {
-            dataManager.save(victimData);
-            return; // natural cause - no Rank Up/level economy effects
-        }
+        if (killer == null) return; // natural cause - no economy effects at all
+
+        PlayerData victimData = dataManager.get(victim.getUniqueId());
 
         // Fresh kill-reward Rank Up, only if the victim actually had a level to lose.
         if (victimData.getPlayerClass() != null && victimData.getLevel() >= 1) {
