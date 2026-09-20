@@ -31,6 +31,13 @@ import java.util.Map;
  * tables, item pickups, inventory clicks (covers villager trades and moving
  * items out of chests), and a periodic full-inventory sweep to catch
  * anything else (commands, other plugins, etc).
+ *
+ * NOTE: the one-time granted Ranger crossbow (Quick Charge 10) is created
+ * directly by ClassAbilityManager with addUnsafeEnchantment, bypassing this
+ * listener entirely - this listener's Quick Charge handling exists so that
+ * cap stays enforced if the crossbow is re-enchanted, combined at an anvil,
+ * or copied some other way, and so it correctly falls back down to vanilla's
+ * cap of 3 for anyone who isn't Ranger L4+.
  */
 public class EnchantCapListener implements Listener {
 
@@ -176,6 +183,6 @@ public class EnchantCapListener implements Listener {
                 Enchantment.SHARPNESS, Enchantment.SMITE, Enchantment.BANE_OF_ARTHROPODS,
                 Enchantment.PROTECTION, Enchantment.BLAST_PROTECTION,
                 Enchantment.PROJECTILE_PROTECTION, Enchantment.FIRE_PROTECTION,
-                Enchantment.POWER);
+                Enchantment.POWER, Enchantment.QUICK_CHARGE);
     }
 }
