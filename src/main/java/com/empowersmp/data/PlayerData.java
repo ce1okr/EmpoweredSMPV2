@@ -4,22 +4,6 @@ import com.empowersmp.classes.PlayerClass;
 
 import java.util.UUID;
 
-/**
- * One player's progress: which class they picked (if any), their level
- * within that class (0 = just picked, gets the "Level 0" starting kit), and
- * their PVP-death counter (0, 1, or 2 - reaching 2 drops them a level and
- * resets to 0).
- *
- * PHASE 2 ADDITIONS:
- *   - bootChoice: Mobility L1's one-time Depth Strider vs Frost Walker pick
- *   - receivedCrossbow / receivedShield: one-time gear grants (Ranger L4,
- *     Defense L1) - gone forever once lost, never reissued
- *   - rangerShotStreak: consecutive successful bow hits, feeds Ranger's
- *     L3/L5 shot procs
- *   - the 4 auto-trigger ability cooldowns (Berserk, Last Stand, Heart
- *     Burst, Speed Blitz), stored as the epoch-millis they end at so they
- *     survive a server restart. Dying resets all 4 back to 0 (ready).
- */
 public class PlayerData {
 
     public enum BootChoice { NONE, DEPTH_STRIDER, FROST_WALKER }
