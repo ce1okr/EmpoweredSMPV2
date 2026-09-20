@@ -10,12 +10,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 /**
  * Frees cached data and persists it when a player leaves. Also catches the
  * case where an admin used /empower setclass on a player while they were
  * offline - their starting kit couldn't be handed to them then, so it's
  * granted the moment they next join instead.
+ *
+ * PHASE 2: also re-applies the player's class passives on join (covers a
+ * server restart wiping infinite-duration potion effects) and on respawn
+ * (death always wipes them) via ClassAbilityManager#refresh.
  */
 public class PlayerConnectionListener implements Listener {
 
@@ -38,6 +43,12 @@ public class PlayerConnectionListener implements Listener {
                                 + "! Your starting kit has been given.", NamedTextColor.LIGHT_PURPLE));
             }, 5L);
         }
+        Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.getClassAbilityManager().refresh(event.getPlayer()), 10L);
+    }
+
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent event) {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.getClassAbilityManager().refresh(event.getPlayer()), 1L);
     }
 
     @EventHandler
