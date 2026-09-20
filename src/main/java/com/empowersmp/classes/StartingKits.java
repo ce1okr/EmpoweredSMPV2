@@ -33,7 +33,10 @@ public final class StartingKits {
                 player.getInventory().addItem(rangerBow());
                 player.getInventory().addItem(new ItemStack(Material.ARROW, 64));
             }
-            case VITALITY -> applyVitalityHeartBoost(player);
+            case VITALITY -> {
+                applyVitalityHeartBoost(player);
+                applyPermanentRegeneration(player);
+            }
             case ELEMENTAL -> { /* Nether access is enforced by the world-restriction listener, not an item */ }
             case INVISIBILITY -> {
                 player.getInventory().addItem(invisibilityPotion());
@@ -88,5 +91,11 @@ public final class StartingKits {
             health.setBaseValue(22.0); // 11 hearts
             player.setHealth(Math.min(22.0, player.getHealth() + (22.0 - old)));
         }
+    }
+
+    private static void applyPermanentRegeneration(Player player) {
+        // Infinite duration, ambient (no swirling particles), no icon spam.
+        player.addPotionEffect(new PotionEffect(
+                PotionEffectType.REGENERATION, PotionEffect.INFINITE_DURATION, 0, true, false, false));
     }
 }
