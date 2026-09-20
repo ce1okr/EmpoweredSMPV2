@@ -1,26 +1,26 @@
 package com.empowersmp.classes;
 
 /**
- * The 8 player classes. A player picks exactly one, once, and levels up
- * within it only (levels are NOT shared across classes). Max level differs
- * per class based on how many named ability tiers it has.
+ * The 8 player classes. A player is assigned exactly one (by an admin, via
+ * /empower setclass) and levels up within it only. All 8 classes cap at
+ * level 5.
  */
 public enum PlayerClass {
-    STRENGTH("Strength", 7),
-    DEFENSE("Defense", 4),
-    MOBILITY("Mobility", 7),
-    RANGER("Ranger", 5),
-    VITALITY("Vitality", 5),
-    ELEMENTAL("Elemental", 5),
-    INVISIBILITY("Invisibility", 5),
-    PROSPERITY("Prosperity", 5);
+    STRENGTH("Strength"),
+    DEFENSE("Defense"),
+    MOBILITY("Mobility"),
+    RANGER("Ranger"),
+    VITALITY("Vitality"),
+    ELEMENTAL("Elemental"),
+    INVISIBILITY("Invisibility"),
+    PROSPERITY("Prosperity");
+
+    public static final int MAX_LEVEL = 5;
 
     private final String displayName;
-    private final int maxLevel;
 
-    PlayerClass(String displayName, int maxLevel) {
+    PlayerClass(String displayName) {
         this.displayName = displayName;
-        this.maxLevel = maxLevel;
     }
 
     public String displayName() {
@@ -28,7 +28,7 @@ public enum PlayerClass {
     }
 
     public int maxLevel() {
-        return maxLevel;
+        return MAX_LEVEL;
     }
 
     public static PlayerClass fromString(String s) {
