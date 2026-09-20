@@ -28,7 +28,14 @@ import java.util.Set;
  *   - Invisibility potions: Invisibility class only
  *   - Strength II potions: Strength class only
  *   - Speed II potions: Mobility class only
+ *   - Fire Resistance potions: Elemental class only
  *   - Turtle Master (all 3 tiers): banned for everyone, no exception
+ *
+ * This covers the drinkable ITEM. The underlying EFFECT (however it's
+ * applied - splash potion thrown by someone else, beacon, /effect give,
+ * etc) is separately blocked by ExclusiveEffectListener, since a player
+ * could otherwise dodge this restriction entirely by having someone else
+ * apply the effect to them.
  *
  * Blocks drinking immediately (PlayerItemConsumeEvent), and also sweeps them
  * out of inventory entirely the same way NetheriteBanListener does, so a
@@ -40,6 +47,8 @@ public class PotionRestrictionListener implements Listener {
             PotionType.INVISIBILITY, PotionType.LONG_INVISIBILITY);
     private static final Set<PotionType> STRENGTH_2_TYPES = Set.of(PotionType.STRONG_STRENGTH);
     private static final Set<PotionType> SPEED_2_TYPES = Set.of(PotionType.STRONG_SWIFTNESS);
+    private static final Set<PotionType> FIRE_RESISTANCE_TYPES = Set.of(
+            PotionType.FIRE_RESISTANCE, PotionType.LONG_FIRE_RESISTANCE);
     private static final Set<PotionType> TURTLE_MASTER_TYPES = Set.of(
             PotionType.TURTLE_MASTER, PotionType.LONG_TURTLE_MASTER, PotionType.STRONG_TURTLE_MASTER);
 
@@ -109,7 +118,6 @@ public class PotionRestrictionListener implements Listener {
     }
 
     private void removeMatchingFromHand(Player player, ItemStack consumed) {
-        // The consume event's item is a copy; strip one matching item from whichever hand held it.
         for (org.bukkit.inventory.EquipmentSlot slot : new org.bukkit.inventory.EquipmentSlot[]{
                 org.bukkit.inventory.EquipmentSlot.HAND, org.bukkit.inventory.EquipmentSlot.OFF_HAND}) {
             ItemStack held = player.getInventory().getItem(slot);
@@ -133,6 +141,7 @@ public class PotionRestrictionListener implements Listener {
         if (INVISIBILITY_TYPES.contains(type)) return playerClass != PlayerClass.INVISIBILITY;
         if (STRENGTH_2_TYPES.contains(type)) return playerClass != PlayerClass.STRENGTH;
         if (SPEED_2_TYPES.contains(type)) return playerClass != PlayerClass.MOBILITY;
+        if (FIRE_RESISTANCE_TYPES.contains(type)) return playerClass != PlayerClass.ELEMENTAL;
 
         return false;
     }
