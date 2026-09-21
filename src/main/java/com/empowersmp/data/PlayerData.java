@@ -153,19 +153,3 @@ public void setPvpDeaths(int pvpDeaths) {
         speedBlitzCooldownEnd = 0;
     }
 }
-
-public boolean hasReceivedStartingKit() {
-    return receivedStartingKit;
-}
-
-public void setReceivedStartingKit(boolean receivedStartingKit) {
-    this.receivedStartingKit = receivedStartingKit;
-}
-
-public int getPvpDeaths() {
-    return pvpDeaths;
-}
-
-public void setPvpDeaths(int pvpDeaths) {
-    this.pvpDeaths = Math.max(0, pvpDeaths);
-}
